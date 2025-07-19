@@ -1,0 +1,80 @@
+注：平台上的实验运行结果位于221220159账号的hdfs里final文件夹中
+
+Task1
+##### 修改并提取books.csv
+project.jar T1_Books_Simplified  /user/root/FinalExp/FinalExp1/dataset/books.csv  final/T1_out1
+##### 计算图书被打的所有标签及次数
+project.jar T1_Book_Tags_Flattened  /user/root/FinalExp/FinalExp1/dataset/book_tags.csv  final/T1_out1 final/T1_out2
+
+Task2
+##### 得到每个用户评过分的所有书，并统计所有的用户数量
+project.jar T2_User_Cnt  /user/root/FinalExp/FinalExp1/dataset/ratings.csv  final/T2_out1 final/User_Num
+##### 在任一用户的评分历史中共现的图书对，统计该共现图书对在所有用户的各自评分历史中的总共现次数
+project.jar T2_Book_Pair  final/T2_out1 final/T2_out2
+##### 在命令行中复制一份刚才的输出
+hdfs dfs -cp final/T2_out2 final/T2_out2_copy
+##### 计算每个图书对的相似度
+project.jar T2_Similarity  final/T2_out2 final/T2_out2_copy final/T1_out1  final/T1_out2 final/T2_out3
+
+Task3
+##### user_preference:为每位用户构建用户画像
+project.jar T3_User_Profile /user/root/FinalExp/FinalExp1/dataset/ratings.csv /user/root/FinalExp/FinalExp1/dataset/to_read.csv  final/T1_out1 final/T1_out2 final/T3_out1
+##### user_feature:为每位用户生成800维向量：512维标签，256维作者，32维年份
+project.jar T3_User_Feature  final/T3_out1 /user/root/FinalExp/FinalExp1/dataset/tags.csv final/T3_out2
+##### 输出文本
+project.jar Read_Vector final/T3_out2 final/T3_out2_Text
+
+##### 计算平均值和方差（这里算的是平方和的均值，方差可以通过该值减去平均值的平方得到）
+project.jar T3_PCA_Prepare  final/T3_out2  final/T3_out3
+##### 输出文本
+project.jar Read_Vector final/T3_out3 final/T3_out3_Text
+
+##### 将数据标准化
+project.jar T3_PCA_Standardization  final/T3_out2  final/T3_out3/part-r-00000 final/T3_out3/part-r-00001 final/T3_out4
+##### 输出文本
+project.jar Read_Vector final/T3_out4 final/T3_out4_Text
+
+##### 计算协方差矩阵并分解特征值得到前800个特征向量组成的矩阵，以及特征值从大到小排序，每一行为该行特征值以及该行之前所有特征值之和占所有特征值之和的比例
+输入：final/T3_out4，输出：标准化后的数据
+project.jar T3_PCA_Covariance  final/T3_out4 final/T3_out5
+##### 输出文本
+project.jar Read_Matrix final/T3_out5 final/T3_out5_Text
+
+##### 使用降维矩阵降维，参数依次为输入目录、cachefile（每一行都是特征向量按照特征值从大到小排序的矩阵）、输出目录、降维的目标维数k
+project.jar T3_PCA_Projection final/T3_out4 final/T3_out5/part-r-00000 final/T3_200dvector 200
+##### 输出文本
+project.jar Read_Vector final/T3_200dvector final/T3_200dvector_Text
+
+##### 随机采样100个中心
+project.jar T3_Sampling final/T3_200dvector final/T3_random_200d 100
+##### 输出文本
+project.jar Read_Vector final/T3_random_200d final/T3_random_200d_Text
+
+##### k-Means聚类 最后一个参数为k
+project.jar T3_KMeans final/T3_200dvector final/T3_random_200d final/T3_KM_200d 100
+##### 输出文本
+project.jar Read_Vector final/T3_KM_200d/iteration-100 final/T3_KM_200d_Text/iteration-100
+
+##### 输出用户聚类
+project.jar T3_User_Cluster final/T3_200dvector final/T3_KM_200d/iteration-100 final/T3_User_Cluster_200d 100
+
+##### 输出聚类信息
+project.jar T3_Cluster_Preference final/T3_out1 final/T3_User_Cluster_200d final/T3_Cluster_Info_200d
+
+##### 判断聚类是否收敛：
+参数 输入目录：某次聚类中心 cachefile：与输入目录相邻的迭代的聚类中心 输出目录
+project.jar Calc_Dis final/T3_KM_200d/iteration-99 final/T3_KM_200d/iteration-100 final/temp/30
+
+Task4
+##### 获取图书集合R
+project.jar T4_User_R /user/root/FinalExp/FinalExp1/dataset/ratings.csv /user/root/FinalExp/FinalExp1/dataset/to_read.csv  final/T4_out1
+##### 获取每个类簇相似度最高的220本图书
+project.jar T4_Cluster_Recommend final/T3_Cluster_Info_200d final/T1_out1 final/T1_out2 final/T4_out2
+##### 获取推荐图书集合W1
+project.jar T4_W1 final/T4_out1 final/T3_User_Cluster_200d final/T4_out2 final/T4_out3
+##### 获取每本书相似度最高的 220 本书
+project.jar T4_books_similarity_process final/T2_out3 final/T4_out4
+##### 获取推荐图书集合W2
+project.jar T4_W2 final/T4_out1 final/T4_out4 final/T4_out5
+##### 获得加权推荐图书
+project.jar T4_Recommend final/T4_out3 final/T4_out5 final/T4_out6

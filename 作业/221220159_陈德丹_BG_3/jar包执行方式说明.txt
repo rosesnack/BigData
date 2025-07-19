@@ -1,0 +1,4 @@
+将BD2.jar上传到平台，点击实验中心-命令行提交，选择作业类型为MapReduce，注意需省略已有的yarn jar
+命令语句：yarn jar BD3.jar IOLogWriteCount input_3 output-Exp3
+
+

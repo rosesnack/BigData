@@ -1,0 +1,15 @@
+将BD2.jar上传到平台，点击实验中心-命令行提交，选择作业类型为MapReduce，注意需省略已有的yarn jar
+一(1)、带词频索引的文档倒排算法：
+yarn jar BD2.jar InvertedIndexer /user/root/Exp2 output-Exp2/1-1
+
+一(2)、对词语的平均出现次数进行全局排序：
+yarn jar BD2.jar Sort /user/221220159stu/output-Exp2/1-1 output-Exp2/1-2
+
+二、计算TF-IDF
+yarn jar BD2.jar TF_IDF /user/root/Exp2 output-Exp2/2-2
+
+三、去除停用词，输出排序后的结果
+yarn jar BD2.jar StopWords /user/root/Exp2 output-Exp2/3-1 hdfs://hcdsj/user/root/Exp2/cn_stopwords.txt
+yarn jar BD2.jar Sort /user/221220159stu/output-Exp2/3-1 output-Exp2/3-2
+
+

@@ -1,0 +1,12 @@
+将BD4.jar上传到平台，点击实验中心-命令行提交，选择作业类型为MapReduce，注意需省略已有的yarn jar
+
+任务1：社交网络中的互相关注好友
+yarn jar BD4.jar MutualFollow /user/root/Exp4 output-Exp4/1
+
+任务2：社交网络寻找共同关注
+yarn jar BD4.jar CommonFollowers /user/root/Exp4 hdfs://hcdsj/user/221220159stu/output-Exp4/1/part-r-00000 15 output-Exp4/2
+
+任务3：好友推荐
+yarn jar BD4.jar FriendRecommendation /user/root/Exp4 hdfs://hcdsj/user/221220159stu/output-Exp4/1/part-r-00000 output-Exp4/3
+
+
